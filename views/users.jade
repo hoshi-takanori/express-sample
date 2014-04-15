@@ -1,0 +1,16 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title= title
+    link(rel='stylesheet', href='/css/style.css')
+  body
+    h1= title
+    table(border=1)
+      tr
+        th name
+        th email
+      - each user in users
+        tr
+          td= user.name
+          td= user.email

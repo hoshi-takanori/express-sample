@@ -18,4 +18,10 @@ app.get('/', function(req, res) {
   res.render('index', { title: 'Express Sample' });
 });
 
+app.get('/users', function(req, res) {
+  connection.query('select * from users', function(err, rows) {
+    res.render('users', { title: 'Express Users', users: rows });
+  });
+});
+
 app.listen(process.env.PORT || 3000);
