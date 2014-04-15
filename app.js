@@ -10,4 +10,4 @@ app.get('/', function(req, res) {
   res.render('index', { title: 'Express Sample' });
 });
 
-app.listen(3000);
+app.listen(process.env.PORT || 3000);
