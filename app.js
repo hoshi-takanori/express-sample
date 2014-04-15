@@ -2,7 +2,7 @@ var express = require('express');
 var mysql = require('mysql');
 var app = express();
 
-var connection = mysql.createConnection({
+var pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'test_user',
   password: process.env.DB_PASS || 'test_password',
@@ -19,8 +19,11 @@ app.get('/', function(req, res) {
 });
 
 app.get('/users', function(req, res) {
-  connection.query('select * from users', function(err, rows) {
-    res.render('users', { title: 'Express Users', users: rows });
+  pool.getConnection(function(err, connection) {
+    connection.query('select * from users', function(err, rows) {
+      res.render('users', { title: 'Express Users', users: rows });
+      connection.release();
+    });
   });
 });
 
