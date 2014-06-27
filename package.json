@@ -9,6 +9,7 @@
     "express": "*",
     "morgan": "*",
     "body-parser": "*",
+    "cookie-parser": "*",
     "jade": "*"
   }
 }
