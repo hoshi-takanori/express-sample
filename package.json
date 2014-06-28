@@ -10,6 +10,7 @@
     "morgan": "*",
     "body-parser": "*",
     "cookie-parser": "*",
+    "express-session": "*",
     "jade": "*"
   }
 }
