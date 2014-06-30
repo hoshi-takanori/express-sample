@@ -8,15 +8,16 @@ html
     h1= title
     if username
       p Welcome, #{username}.
-      form(method='post', action='/')
-        input(type='hidden', name='logout', value='1')
+      form(method='post', action='/logout')
         input(type='submit', value='Logout')
     else
       if error
         p= error
       else
-        p What's your name?
-      form(method='post', action='/')
-        input(type='text', name='username')
-        input(type='password', name='password')
+        p Please login.
+      form(method='post', action='/login')
+        input(type='text', name='username', placeholder='Username')
+        br
+        input(type='password', name='password', placeholder='Password')
+        br
         input(type='submit', value='Login')
