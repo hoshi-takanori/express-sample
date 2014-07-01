@@ -29,6 +29,10 @@ var sessionParams = {
   resave: true,
   saveUninitialized: false
 };
+if (process.env.CUSTOM_STORE) {
+  var store = require(process.env.CUSTOM_STORE)(session);
+  sessionParams.store = new store({ debug: process.env.DEBUG_STORE });
+}
 if (app.get('env') == 'production') {
   sessionParams.cookie = { secure: true };
   if (process.env.TRUST_PROXY) {
