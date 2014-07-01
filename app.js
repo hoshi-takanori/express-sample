@@ -8,10 +8,19 @@ var app = express();
 app.set('view engine', 'jade');
 app.set('views', __dirname + '/views');
 
+morgan.token('username', function (req, res) {
+  return req.session && req.session.username;
+});
 if (app.get('env') == 'production' && ! process.env.LOG_FORMAT) {
+  var format;
+  if (process.env.TRUST_PROXY) {
+    format = ':req[x-forwarded-for] - :username [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"';
+  } else {
+    format = ':remote-addr - :username [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"';
+  }
   var fs = require('fs');
   var stream = fs.createWriteStream(__dirname + '/log.txt', { flags: 'a' });
-  app.use(morgan({ stream: stream }));
+  app.use(morgan({ format: format, stream: stream }));
 } else if (process.env.LOG_FORMAT && process.env.LOG_FORMAT != 'dev') {
   app.use(morgan(process.env.LOG_FORMAT));
 } else {
@@ -39,7 +48,7 @@ if (app.get('env') == 'production') {
     sessionParams.proxy = true;
   }
 }
-if (process.env.DEBUG_SESSION) {
+if (process.env.COOKIE_HACK || process.env.DEBUG_SESSION) {
   var uid = require('express-session/node_modules/uid-safe').sync;
   sessionParams.genid = function (req) {
     req.sessionID_isNew = true;
@@ -59,6 +68,13 @@ if (process.env.DEBUG_SESSION) {
     console.log(str);
     next();
   });
+}
+
+if (process.env.COOKIE_HACK) {
+  var hack = require(process.env.COOKIE_HACK);
+  app.get('/set-cookie', hack.setCookie);
+  app.get('/get-cookie', hack.getCookie);
+  app.use(hack.checkCookie);
 }
 
 app.get('/', function (req, res) {
