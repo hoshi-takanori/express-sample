@@ -6,10 +6,20 @@ html
     link(rel='stylesheet', href='/css/style.css')
   body
     h1= title
-    if username
+    if message
+      p= message
+      p
+        a(href='/') Top page
+    else if username
       p Welcome, #{username}.
       form(method='post', action='/logout')
         input(type='submit', value='Logout')
+      if links
+        p Links
+        ul
+          for link in links
+            li
+              a(href=link.href)= link.text
     else
       if error
         p= error
