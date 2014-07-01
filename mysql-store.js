@@ -1,4 +1,5 @@
 var mysql = require('mysql');
+var bcrypt = require('bcrypt');
 
 var pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
@@ -42,12 +43,13 @@ module.exports = function (session) {
 
   MySQLStore.prototype.set = function (sid, sess, fn) {
     var debug = this.debug;
-    if (debug) console.log('MySQLStore.set: sid = ' + sid);
+    if (debug) console.log('MySQLStore.set: sid = ' + sid + ', sess =', sess);
+    var user = sess.username || null;
     sess = JSON.stringify(sess);
-    var sql = 'insert into sessions (sid, value, create_date) ' +
-        'values (?, ?, now()) on duplicate key update ' +
-        'value = ?, update_count = update_count + 1';
-    query(sql, [sid, sess, sess], function (err, result) {
+    var sql = 'insert into sessions (sid, value, username, create_date) ' +
+        'values (?, ?, ?, now()) on duplicate key update ' +
+        'value = ?, username = ?, update_count = update_count + 1';
+    query(sql, [sid, sess, user, sess, user], function (err, result) {
       if (err) return fn && fn(err);
       if (debug) console.log('result =', result);
       fn && fn();
@@ -66,4 +68,13 @@ module.exports = function (session) {
   }
 
   return MySQLStore;
+};
+
+module.exports.checkPassword = function (username, password, fn) {
+  var sql = 'select * from users where name = ?';
+  pool.query(sql, [username], function (err, rows) {
+    if (err) return fn(err);
+    if (! rows || rows.length != 1) return fn();
+    bcrypt.compare(password, rows[0].password, fn);
+  });
 };

@@ -12,6 +12,7 @@
     "cookie-parser": "*",
     "express-session": "*",
     "mysql": "*",
+    "bcrypt": "*",
     "jade": "*"
   }
 }

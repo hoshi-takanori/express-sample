@@ -85,8 +85,14 @@ app.get('/login', function (req, res) {
   }
 });
 
-function checkPassword(username, password, fn) {
+var checkPassword = function (username, password, fn) {
   fn(null, username == password);
+};
+if (process.env.CUSTOM_STORE) {
+  var store = require(process.env.CUSTOM_STORE);
+  if (typeof store.checkPassword == 'function') {
+    checkPassword = store.checkPassword;
+  }
 }
 
 app.post('/login', function (req, res, next) {
