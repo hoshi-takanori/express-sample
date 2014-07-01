@@ -23,12 +23,39 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 var cookieName = 'connect.sid';
-app.use(session({
+var sessionParams = {
   name: cookieName,
   secret: process.env.SESSION_SECRET || 'session secret',
   resave: true,
   saveUninitialized: false
-}));
+};
+if (app.get('env') == 'production') {
+  sessionParams.cookie = { secure: true };
+  if (process.env.TRUST_PROXY) {
+    sessionParams.proxy = true;
+  }
+}
+if (process.env.DEBUG_SESSION) {
+  var uid = require('express-session/node_modules/uid-safe').sync;
+  sessionParams.genid = function (req) {
+    req.sessionID_isNew = true;
+    return uid(24);
+  };
+}
+app.use(session(sessionParams));
+
+if (process.env.DEBUG_SESSION) {
+  app.use(function (req, res, next) {
+    var str = 'session id = ' + req.sessionID;
+    if (req.sessionID_isNew) {
+      str += ' (new)';
+    } else if (req.session.username) {
+      str += ', username = ' + req.session.username;
+    }
+    console.log(str);
+    next();
+  });
+}
 
 app.get('/', function (req, res) {
   var username = req.session.username;
