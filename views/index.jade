@@ -11,8 +11,10 @@ html
       p
         a(href='/') Top page
     else if username
-      p Welcome, #{username}.
       form(method='post', action='/logout')
+        | User: #{username} | 
+        a(href='/password') Password
+        |  | 
         input(type='submit', value='Logout')
       if links
         p Links
@@ -22,7 +24,7 @@ html
               a(href=link.href)= link.text
     else
       if error
-        p= error
+        p(class='error')= error
       else
         p Please login.
       form(method='post', action='/login')

@@ -68,3 +68,10 @@ module.exports.checkPassword = function (username, password, fn) {
     bcrypt.compare(password, rows[0].password, fn);
   });
 };
+
+module.exports.changePassword = function (username, password, fn) {
+  var salt = bcrypt.genSaltSync(10);
+  var hash = bcrypt.hashSync(password, salt);
+  var sql = 'update users set password = ? where name = ?';
+  pool.query(sql, [hash, username], fn);
+};

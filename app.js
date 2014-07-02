@@ -104,10 +104,14 @@ app.get('/login', function (req, res) {
 var checkPassword = function (username, password, fn) {
   fn(null, username == password);
 };
+var changePassword;
 if (process.env.CUSTOM_STORE) {
   var store = require(process.env.CUSTOM_STORE);
   if (typeof store.checkPassword == 'function') {
     checkPassword = store.checkPassword;
+  }
+  if (typeof store.changePassword == 'function') {
+    changePassword = store.changePassword;
   }
 }
 
@@ -138,6 +142,34 @@ app.use(function (req, res, next) {
     next();
   }
 });
+
+if (changePassword) {
+  app.get('/password', function (req, res) {
+    res.render('password', { title: 'Change Password' });
+  });
+
+  app.post('/password', function (req, res, next) {
+    var username = req.session.username;
+    var current = req.param('current');
+    var new1 = req.param('new1');
+    var new2 = req.param('new2');
+    checkPassword(username, current, function (err, result) {
+      if (err) return next(err);
+      if (result && new1 == new2 && new1.length >= 6 && new1 != username) {
+        changePassword(username, new1, function (err, result) {
+          if (err) return next(err);
+          if (result) {
+            res.render('password', { title: 'Change Password', message: 'Your password has been changed successfully.' });
+          } else {
+            res.render('password', { title: 'Change Password', error: 'Failed to change your password.' });
+          }
+        });
+      } else {
+        res.render('password', { title: 'Change Password', error: 'Bad password.' });
+      }
+    });
+  });
+}
 
 app.get('/aaa', function (req, res) {
   res.render('index', { title: 'AAA', message: 'Welcome to AAA.' });
