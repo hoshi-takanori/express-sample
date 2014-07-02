@@ -8,16 +8,6 @@ var pool = mysql.createPool({
   database: process.env.DB_NAME || 'test_db'
 });
 
-function query(sql, arr, fn) {
-  pool.getConnection(function (err, conn) {
-    if (err) return fn(err);
-    conn.query(sql, arr, function (err, result) {
-      conn.release();
-      fn(err, result);
-    });
-  });
-}
-
 module.exports = function (session) {
   var Store = session.Store;
 
@@ -32,7 +22,7 @@ module.exports = function (session) {
     var debug = this.debug;
     if (debug) console.log('MySQLStore.get: sid = ' + sid);
     var sql = 'select * from sessions where sid = ?';
-    query(sql, [sid], function (err, rows) {
+    pool.query(sql, [sid], function (err, rows) {
       if (err) return fn(err);
       if (debug) console.log('rows =', rows);
       if (! rows || rows.length != 1) return fn();
@@ -49,7 +39,7 @@ module.exports = function (session) {
     var sql = 'insert into sessions (sid, value, username, create_date) ' +
         'values (?, ?, ?, now()) on duplicate key update ' +
         'value = ?, username = ?, update_count = update_count + 1';
-    query(sql, [sid, sess, user, sess, user], function (err, result) {
+    pool.query(sql, [sid, sess, user, sess, user], function (err, result) {
       if (err) return fn && fn(err);
       if (debug) console.log('result =', result);
       fn && fn();
@@ -60,7 +50,7 @@ module.exports = function (session) {
     var debug = this.debug;
     if (debug) console.log('MySQLStore.destroy: sid = ' + sid);
     var sql = 'delete from sessions where sid = ?';
-    query(sql, [sid], function (err, result) {
+    pool.query(sql, [sid], function (err, result) {
       if (err) return fn && fn(err);
       if (debug) console.log('result =', result);
       fn && fn();
