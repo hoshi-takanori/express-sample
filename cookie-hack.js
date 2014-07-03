@@ -14,7 +14,10 @@ exports.setCookie = function (req, res) {
 exports.getCookie = function (req, res) {
   if (debug) console.log('getCookie: headers =', req.headers);
   if (req.sessionID_isNew) {
-    res.render('index', { title: 'Express Sample', message: 'No cookie...' });
+    res.render('index', {
+      error: 'No cookie.',
+      message: 'Something goes wrong...'
+    });
   } else {
     res.redirect('/');
   }

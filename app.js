@@ -80,10 +80,9 @@ var login = require('./login');
 
 app.get('/', function (req, res) {
   if (! req.session.username) {
-    res.render('index', { title: 'Express Sample' });
+    res.render('login');
   } else {
     res.render('index', {
-      title: 'Express Sample',
       username: req.session.username,
       password: login.canChangePassword(),
       links: [

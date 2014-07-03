@@ -19,7 +19,9 @@ if (store && typeof store.changePassword == 'function') {
 
 exports.getLogin = function (req, res) {
   if (! req.session.username) {
-    res.render('index', { title: 'Express Sample', error: 'This page is for members only. Please login.' });
+    res.render('login', {
+      error: 'This page is for members only. Please login.'
+    });
   } else {
     res.redirect('/');
   }
@@ -34,7 +36,7 @@ exports.postLogin = function (req, res, next) {
       req.session.username = username;
       res.redirect('/');
     } else {
-      res.render('index', { title: 'Express Sample', error: 'Unknown username or password.' });
+      res.render('login', { error: 'Unknown username or password.' });
     }
   });
 };
@@ -58,7 +60,7 @@ exports.canChangePassword = function () {
 };
 
 exports.getPassword = function (req, res) {
-  res.render('password', { title: 'Change Password' });
+  res.render('password');
 };
 
 exports.postPassword = function (req, res, next) {
@@ -72,13 +74,18 @@ exports.postPassword = function (req, res, next) {
       changePassword(username, new1, function (err, result) {
         if (err) return next(err);
         if (result) {
-          res.render('password', { title: 'Change Password', message: 'Your password has been changed successfully.' });
+          req.session.destroy();
+          res.clearCookie(process.env.COOKIE_NAME || 'connect.sid');
+          res.render('login', {
+            title: 'Change Password',
+            good: 'Your password has been changed successfully. Please login again.'
+          });
         } else {
-          res.render('password', { title: 'Change Password', error: 'Failed to change your password.' });
+          res.render('password', { error: 'Failed to change your password.' });
         }
       });
     } else {
-      res.render('password', { title: 'Change Password', error: 'Bad password.' });
+      res.render('password', { error: 'Bad password.' });
     }
   });
 };

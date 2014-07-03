@@ -1,0 +1,24 @@
+if !title
+  - title = 'Express Sample'
+
+mixin common(message)
+  doctype html
+  html
+    head
+      meta(charset='utf-8')
+      title= title
+      link(rel='stylesheet', href='/css/style.css')
+    body
+      h1= title
+      if good
+        p(class='good')= good
+      else if error
+        p(class='error')= error
+      else if message
+        p= message
+      if block
+        block
+
+mixin back
+  p
+    a(href='/') Top page
