@@ -31,9 +31,8 @@ app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-var cookieName = 'connect.sid';
 var sessionParams = {
-  name: cookieName,
+  name: process.env.COOKIE_NAME || 'connect.sid',
   secret: process.env.SESSION_SECRET || 'session secret',
   resave: true,
   saveUninitialized: false
@@ -77,6 +76,8 @@ if (process.env.COOKIE_HACK) {
   app.use(hack.checkCookie);
 }
 
+var login = require('./login');
+
 app.get('/', function (req, res) {
   if (! req.session.username) {
     res.render('index', { title: 'Express Sample' });
@@ -84,6 +85,7 @@ app.get('/', function (req, res) {
     res.render('index', {
       title: 'Express Sample',
       username: req.session.username,
+      password: login.canChangePassword(),
       links: [
         { href: '/aaa', text: 'AAA' },
         { href: '/bbb', text: 'BBB' },
@@ -93,82 +95,15 @@ app.get('/', function (req, res) {
   }
 });
 
-app.get('/login', function (req, res) {
-  if (! req.session.username) {
-    res.render('index', { title: 'Express Sample', error: 'This page is for members only. Please login.' });
-  } else {
-    res.redirect('/');
-  }
-});
+app.get('/login', login.getLogin);
+app.post('/login', login.postLogin);
+app.post('/logout', login.postLogout);
 
-var checkPassword = function (username, password, fn) {
-  fn(null, username == password);
-};
-var changePassword;
-if (process.env.CUSTOM_STORE) {
-  var store = require(process.env.CUSTOM_STORE);
-  if (typeof store.checkPassword == 'function') {
-    checkPassword = store.checkPassword;
-  }
-  if (typeof store.changePassword == 'function') {
-    changePassword = store.changePassword;
-  }
-}
+app.use(login.checkLogin);
 
-app.post('/login', function (req, res, next) {
-  var username = req.param('username');
-  var password = req.param('password');
-  checkPassword(username, password, function (err, result) {
-    if (err) return next(err);
-    if (result) {
-      req.session.username = username;
-      res.redirect('/');
-    } else {
-      res.render('index', { title: 'Express Sample', error: 'Unknown username or password.' });
-    }
-  });
-});
-
-app.post('/logout', function (req, res) {
-  req.session.destroy();
-  res.clearCookie(cookieName);
-  res.redirect('/');
-});
-
-app.use(function (req, res, next) {
-  if (! req.session.username) {
-    res.redirect('/login');
-  } else {
-    next();
-  }
-});
-
-if (changePassword) {
-  app.get('/password', function (req, res) {
-    res.render('password', { title: 'Change Password' });
-  });
-
-  app.post('/password', function (req, res, next) {
-    var username = req.session.username;
-    var current = req.param('current');
-    var new1 = req.param('new1');
-    var new2 = req.param('new2');
-    checkPassword(username, current, function (err, result) {
-      if (err) return next(err);
-      if (result && new1 == new2 && new1.length >= 6 && new1 != username) {
-        changePassword(username, new1, function (err, result) {
-          if (err) return next(err);
-          if (result) {
-            res.render('password', { title: 'Change Password', message: 'Your password has been changed successfully.' });
-          } else {
-            res.render('password', { title: 'Change Password', error: 'Failed to change your password.' });
-          }
-        });
-      } else {
-        res.render('password', { title: 'Change Password', error: 'Bad password.' });
-      }
-    });
-  });
+if (login.canChangePassword()) {
+  app.get('/password', login.getPassword);
+  app.post('/password', login.postPassword);
 }
 
 app.get('/aaa', function (req, res) {

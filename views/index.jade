@@ -13,8 +13,9 @@ html
     else if username
       form(method='post', action='/logout')
         | User: #{username} | 
-        a(href='/password') Password
-        |  | 
+        if password
+          a(href='/password') Password
+          |  | 
         input(type='submit', value='Logout')
       if links
         p Links
