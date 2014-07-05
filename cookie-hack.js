@@ -11,13 +11,10 @@ exports.setCookie = function (req, res) {
   }
 };
 
-exports.getCookie = function (req, res) {
+exports.getCookie = function (req, res, next) {
   if (debug) console.log('getCookie: headers =', req.headers);
   if (req.sessionID_isNew) {
-    res.render('index', {
-      error: 'No cookie.',
-      message: 'Something goes wrong...'
-    });
+    next(new Error('Session cookie is not set.'));
   } else {
     res.redirect('/');
   }
