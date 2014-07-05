@@ -1,14 +1,13 @@
 if !title
   block title
-    - title = 'Express Sample'
+    - title = settings.title
 
 mixin navi
   if username
     form(method='post', action='/logout')
       | User: #{username} | 
-      if password
-        a(href='/password') Password
-        |  | 
+      a(href='/password') Password
+      |  | 
       input(type='submit', value='Logout')
 
 mixin message(alt)

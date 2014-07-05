@@ -17,7 +17,7 @@ if (store && typeof store.changePassword == 'function') {
   changePassword = store.changePassword;
 }
 
-exports.getLogin = function (req, res) {
+function getLogin(req, res) {
   if (! req.session.username) {
     res.render('login', {
       error: 'This page is for members only. Please login.'
@@ -25,9 +25,9 @@ exports.getLogin = function (req, res) {
   } else {
     res.redirect('/');
   }
-};
+}
 
-exports.postLogin = function (req, res, next) {
+function postLogin(req, res, next) {
   var username = req.param('username');
   var password = req.param('password');
   checkPassword(username, password, function (err, result) {
@@ -39,31 +39,27 @@ exports.postLogin = function (req, res, next) {
       res.render('login', { error: 'Unknown username or password.' });
     }
   });
-};
+}
 
-exports.postLogout = function (req, res) {
+function postLogout(req, res) {
   req.session.destroy();
   res.clearCookie(process.env.COOKIE_NAME || 'connect.sid');
   res.redirect('/');
-};
+}
 
-exports.checkLogin = function (req, res, next) {
+function checkLogin(req, res, next) {
   if (! req.session.username) {
     res.redirect('/login');
   } else {
     next();
   }
-};
+}
 
-exports.canChangePassword = function () {
-  return changePassword ? true : false;
-};
-
-exports.getPassword = function (req, res) {
+function getPassword(req, res) {
   res.render('password');
-};
+}
 
-exports.postPassword = function (req, res, next) {
+function postPassword(req, res, next) {
   var username = req.session.username;
   var current = req.param('current');
   var new1 = req.param('new1');
@@ -88,4 +84,17 @@ exports.postPassword = function (req, res, next) {
       res.render('password', { error: 'Bad password.' });
     }
   });
+}
+
+exports.setup = function (app) {
+  app.get('/login', getLogin);
+  app.post('/login', postLogin);
+  app.post('/logout', postLogout);
+
+  app.use(checkLogin);
+
+  if (changePassword) {
+    app.get('/password', getPassword);
+    app.post('/password', postPassword);
+  }
 };

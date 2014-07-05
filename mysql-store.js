@@ -65,7 +65,9 @@ module.exports.checkPassword = function (username, password, fn) {
   pool.query(sql, [username], function (err, rows) {
     if (err) return fn(err);
     if (! rows || rows.length != 1) return fn();
-    bcrypt.compare(password, rows[0].password, fn);
+    bcrypt.compare(password, rows[0].password, function (err, result) {
+      fn(err, result && rows[0]);
+    });
   });
 };
 
