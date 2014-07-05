@@ -1,6 +1,9 @@
-include common
+extends base
 
-+common('Please login.')
+block message
+  +message('Please login.')
+
+block content
   form(method='post', action='/login')
     input(type='text', name='username', placeholder='Username')
     br

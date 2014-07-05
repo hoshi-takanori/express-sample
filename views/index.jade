@@ -1,19 +1,15 @@
-include common
+extends base
 
-+common
+block content
   if message
     p= message
-    +back
-  if username
-    form(method='post', action='/logout')
-      | User: #{username} | 
-      if password
-        a(href='/password') Password
-        |  | 
-      input(type='submit', value='Logout')
   if links
     p Links
     ul
       for link in links
         li
           a(href=link.href)= link.text
+
+block back
+  if message
+    +back

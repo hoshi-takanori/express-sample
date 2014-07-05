@@ -1,0 +1,43 @@
+if !title
+  block title
+    - title = 'Express Sample'
+
+mixin navi
+  if username
+    form(method='post', action='/logout')
+      | User: #{username} | 
+      if password
+        a(href='/password') Password
+        |  | 
+      input(type='submit', value='Logout')
+
+mixin message(alt)
+  if good
+    p(class='good')= good
+  else if error
+    p(class='error')= error
+  else if alt
+    p= alt
+
+mixin back
+  p
+    a(href='/') Top page
+
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    title= title
+    block styles
+      link(rel='stylesheet', href='/css/style.css')
+    block scripts
+  body
+    block header
+      h1= title
+    block navi
+      +navi
+    block message
+      +message
+    block content
+    block back
+    block footer
