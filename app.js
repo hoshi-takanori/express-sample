@@ -14,17 +14,19 @@ app.set('views', __dirname + '/views');
 
 app.use(express.static(__dirname + '/public'));
 
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
   res.render('index', { title: 'Express Sample' });
 });
 
-app.get('/users', function(req, res) {
-  pool.getConnection(function(err, connection) {
-    connection.query('select * from users', function(err, rows) {
-      res.render('users', { title: 'Express Users', users: rows });
-      connection.release();
-    });
+app.get('/users', function (req, res, next) {
+  pool.query('select * from users', function (err, rows) {
+    if (err) return next(err);
+    res.render('users', { title: 'Express Users', users: rows });
   });
+});
+
+app.use(function (err, req, res, next) {
+  res.send(500, 'Error: ' + err.message);
 });
 
 app.listen(process.env.PORT || 3000);
