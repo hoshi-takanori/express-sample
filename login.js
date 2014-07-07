@@ -17,6 +17,14 @@ if (store && typeof store.changePassword == 'function') {
   changePassword = store.changePassword;
 }
 
+function getIndex(req, res, next) {
+  if (! req.session.username) {
+    res.render('login');
+  } else {
+    next();
+  }
+}
+
 function getLogin(req, res) {
   if (! req.session.username) {
     res.render('login', {
@@ -87,6 +95,8 @@ function postPassword(req, res, next) {
 }
 
 exports.setup = function (app) {
+  app.get('/', getIndex);
+
   app.get('/login', getLogin);
   app.post('/login', postLogin);
   app.post('/logout', postLogout);
